@@ -37,6 +37,7 @@ import {
   Share2,
 } from "lucide-react";
 import { SITE_DATA, PROGRAMS, FAQS, BLOG_POSTS } from "@/lib/siteData";
+import { trpc } from "@/lib/trpc";
 
 const ASSETS = {
   hero: "/manus-storage/artaqy-hero_023cad76.jpg",
@@ -67,6 +68,8 @@ const faqIconMap = {
   documents: FileText,
   transport: Bus,
 };
+
+type FaqRecord = { question: string; answer: string; icon: string; category: string };
 
 const faqCategories = [
   { id: "all", label: "كل الأسئلة" },
@@ -190,6 +193,10 @@ export default function Home() {
   const [faqSearch, setFaqSearch] = useState(getInitialFaqSearch);
   const [faqCategory, setFaqCategory] = useState<(typeof faqCategories)[number]["id"]>(getInitialFaqCategory);
   const [whatsappNotice, setWhatsappNotice] = useState(false);
+  const { data: managedFaqs } = trpc.faq.listPublished.useQuery();
+  const faqItems: readonly FaqRecord[] = managedFaqs?.length
+    ? managedFaqs.map((item) => ({ question: item.question, answer: item.answer, icon: item.icon, category: item.category }))
+    : FAQS;
 
   useEffect(() => {
     try {
@@ -238,7 +245,7 @@ export default function Home() {
 
   const closeMenu = () => setMenuOpen(false);
   const normalizedFaqSearch = faqSearch.trim().toLocaleLowerCase("ar");
-  const categoryFilteredFaqs = FAQS.filter((item) => faqCategory === "all" || item.category === faqCategory);
+  const categoryFilteredFaqs = faqItems.filter((item) => faqCategory === "all" || item.category === faqCategory);
   const filteredFaqs = categoryFilteredFaqs.filter((item) => `${item.question} ${item.answer}`.toLocaleLowerCase("ar").includes(normalizedFaqSearch));
   const firstFilteredFaqQuestion = filteredFaqs[0]?.question ?? "";
   useEffect(() => {
@@ -265,7 +272,7 @@ export default function Home() {
     window.setTimeout(() => setFeedbackNotice((current) => current === question ? null : current), 2200);
   };
   const handleFaqFeedbackNote = (question: string, note: string) => setFaqFeedbackNotes((current) => ({ ...current, [question]: note }));
-  const handleShareFaq = async (item: (typeof FAQS)[number]) => {
+  const handleShareFaq = async (item: FaqRecord) => {
     const url = `${window.location.origin}${window.location.pathname}#faq-${item.icon}`;
     const shareText = `${item.question}\n${item.answer}`;
     try {
@@ -290,14 +297,14 @@ export default function Home() {
   const handleShowAllFaqs = () => {
     setFaqCategory("all");
     setFaqSearch("");
-    setOpenFaqs(FAQS[0]?.question ? [FAQS[0].question] : []);
+    setOpenFaqs(faqItems[0]?.question ? [faqItems[0].question] : []);
   };
   const handleToggleAllFaqs = () => setOpenFaqs(allFaqsOpen ? [] : filteredFaqs.map((item) => item.question));
   const faqToggleLabel = `${allFaqsOpen ? "طي" : "فتح"} ${faqCountLabel}`;
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQS.filter((item) => !item.answer.startsWith("TODO")).map((item) => ({
+    mainEntity: faqItems.filter((item) => !item.answer.startsWith("TODO")).map((item) => ({
       "@type": "Question",
       name: item.question,
       acceptedAnswer: { "@type": "Answer", text: item.answer },
