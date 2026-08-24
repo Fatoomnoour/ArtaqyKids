@@ -1,64 +1,171 @@
-name: Deploy Artaqy Kids to Vercel
+name: Deploy Artaqy Kids
+
+
 
 on:
+
   push:
+  
     branches: [main]
+    
   workflow_dispatch:
+  
+
 
 permissions:
+
   contents: read
+  
+
 
 concurrency:
+
   group: vercel-production
+  
   cancel-in-progress: true
+  
+
 
 jobs:
+
   deploy:
+  
     runs-on: ubuntu-latest
+    
     steps:
+    
       - name: Checkout
+      
         uses: actions/checkout@v4
+        
+
 
       - name: Enable pnpm
+      
         uses: pnpm/action-setup@v4
         
 
+
       - name: Setup Node
+      
         uses: actions/setup-node@v4
+        
         with:
+        
           node-version: 22
+          
           cache: pnpm
+          
+
 
       - name: Install dependencies
+      
         run: pnpm install --frozen-lockfile
+        
+
 
       - name: Typecheck
+      
         run: pnpm check
+        
+
 
       - name: Build
+      
         run: pnpm build
+        
+
 
       - name: Link Vercel project
+      
         run: |
+        
           mkdir -p .vercel
+          
           printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+          
         env:
+        
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_3YlBUxRjWEE3Oo3IyBORv1qc' }}
+          
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_0MCLHENHOTMcCFXSz3k48Z3a0qe1' }}
+          
+
 
       - name: Pull Vercel production settings
+      
         run: pnpm dlx vercel pull --yes --environment=production --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID"
+        
         env:
+        
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          
+
 
       - name: Build Vercel output
+      
         run: pnpm dlx vercel build --prod --token "$VERCEL_TOKEN"
+        
         env:
+        
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          
+
 
       - name: Deploy to Vercel
+      
         run: pnpm dlx vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID"
+        
         env:
+        
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
