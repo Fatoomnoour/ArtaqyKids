@@ -40,11 +40,11 @@ import { SITE_DATA, PROGRAMS, FAQS, BLOG_POSTS } from "@/lib/siteData";
 import { trpc } from "@/lib/trpc";
 
 const ASSETS = {
-  hero: "/manus-storage/artaqy-hero_023cad76.jpg",
-  activity: "/manus-storage/artaqy-activity_67e066cf.jpg",
-  space: "/manus-storage/artaqy-space_db86b191.jpg",
-  childBook: "/manus-storage/artaqy-child-book_de0aa595.jpg",
-  mark: "/manus-storage/artaqy-mark_53172377.png",
+  hero: "/manus-storage/artaqy-hero_5d908a17.jpg",
+  activity: "/manus-storage/artaqy-activity_eac203fb.jpg",
+  space: "/manus-storage/artaqy-space_18c2ca43.jpg",
+  childBook: "/manus-storage/artaqy-child-book_6602b9cc.jpg",
+  mark: "/manus-storage/artaqy-mark_a50de34e.png",
 };
 
 const iconMap = {
